@@ -1,5 +1,16 @@
 $(function() {
     var app = $("#app");
+    function apiCall(method, path, data) {
+        var settings = {
+            method: method,
+            url: "http://localhost:8282" + path,
+            contentType: "application/json"
+        };
+        if (data) {
+            settings.data = JSON.stringify(data);
+        }
+        return $.ajax(settings);
+    }
     function renderBookDetails(bookDetails, data) {
         bookDetails
             .empty()
@@ -11,6 +22,7 @@ $(function() {
             .append("Typ: " + data.type + "<br />");
     }
     function renderBooks(books) {
+        app.empty();
         books.forEach(function(book) {
             var bookElement = $("<div>");
             var bookTitle = $("<div>");
@@ -22,10 +34,7 @@ $(function() {
                 .appendTo(bookElement);
             bookTitle.one("click", function() {
                 bookDetails.text("...");
-                $.ajax({
-                    method: "GET",
-                    url: "http://localhost:8282/books/" + book.id
-                }).done(function(data) {
+                apiCall("GET", "/books/" + book.id).done(function(data) {
                     renderBookDetails(bookDetails, data);
                 });
             });
@@ -33,10 +42,21 @@ $(function() {
         });
     }
     function fetchBooks() {
-        $.ajax({
-            method: "GET",
-            url: "http://localhost:8282/books"
-        }).done(renderBooks);
+        apiCall("GET", "/books").done(renderBooks);
+    }
+    function handleForm() {
+        $("#bookForm").on("submit", function(e) {
+            e.preventDefault();
+            var data = {};
+            $(this)
+                .find("input")
+                .each(function() {
+                    var name = $(this).attr("name");
+                    data[name] = $(this).val();
+                });
+            apiCall("POST", "/books", data).done(fetchBooks);
+        });
     }
     fetchBooks();
+    handleForm();
 });
