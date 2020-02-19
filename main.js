@@ -34,23 +34,33 @@ $(function () {
             bookElement.addClass("book").appendTo(app);
             bookTitle
                 .addClass("book-title")
+                .attr('data-method', 'get')
+                .attr('data-id', book.id)
                 .text(book.title)
                 .appendTo(bookElement);
             bookTitle.one("click", function () {
                 bookDetails.text("...");
-                apiCall("GET", "/books/" + book.id).done(function (data) {
+                doSomething(bookTitle, function (data) {
                     renderBookDetails(bookDetails, data);
                 });
+                bookTitle.css("cursor", "default");
             });
             bookDetails.addClass("book-details").appendTo(bookElement);
             link.addClass("delete")
+                .attr('data-method', 'delete')
+                .attr('data-id', book.id)
                 .text("Usuń książkę")
                 .appendTo(bookElement);
             link.on("click", function () {
-               apiCall("DELETE", "/books/" + book.id).done(fetchBooks);
+                doSomething(link, fetchBooks)
             });
         });
     }
+
+    function doSomething(clickedPlace, action) {
+        apiCall(clickedPlace.data("method"), "/books/" + clickedPlace.data("id"))
+            .done(action);
+    };
 
     function fetchBooks() {
         apiCall("GET", "/books").done(renderBooks);
