@@ -57,6 +57,7 @@ $(function () {
         });
     }
 
+    // function to read datasets
     function doSomething(clickedPlace, action) {
         apiCall(clickedPlace.data("method"), "/books/" + clickedPlace.data("id"))
             .done(action);
